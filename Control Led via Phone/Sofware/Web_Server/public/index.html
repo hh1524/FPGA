@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>UART Bit Sender</title>
+  <style>
+    body { font-family: Arial; text-align: center; margin-top: 40px; }
+    h2 { margin-bottom: 30px; }
+    .switches {
+      display: flex; justify-content: center; gap: 12px;
+      margin-bottom: 30px;
+    }
+    label { font-size: 18px; user-select: none; }
+    input[type="checkbox"] { transform: scale(1.5); margin-right: 5px; }
+    button {
+      padding: 10px 25px;
+      font-size: 16px;
+      border: none;
+      border-radius: 5px;
+      background-color: #0078D7;
+      color: white;
+      cursor: pointer;
+    }
+    button:hover { background-color: #005a9e; }
+    #status {
+      margin-top: 20px;
+      font-family: monospace;
+      color: green;
+    }
+  </style>
+</head>
+<body>
+  <h2>8-bit UART Binary Sender</h2>
+
+  <div class="switches">
+    <label><input type="checkbox" id="b7">LED 7</label>
+    <label><input type="checkbox" id="b6">LED 6</label>
+    <label><input type="checkbox" id="b5">LED 5</label>
+    <label><input type="checkbox" id="b4">LED 4</label>
+    <label><input type="checkbox" id="b3">LED 3</label>
+    <label><input type="checkbox" id="b2">LED 2</label>
+    <label><input type="checkbox" id="b1">LED 1</label>
+    <label><input type="checkbox" id="b0">LED 0</label>
+  </div>
+
+  <button onclick="sendBits()">Send</button>
+
+  <p id="status"></p>
+
+  <script>
+    async function sendBits() {
+      const bits = [...Array(8).keys()]
+        .map(i => document.getElementById('b' + (7 - i)).checked ? '1' : '0')
+        .join('');
+
+      document.getElementById('status').innerText = `Sending: ${bits}...`;
+
+      try {
+        const res = await fetch('/send', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ bits })
+        });
+        const text = await res.text();
+        document.getElementById('status').innerText = text;
+      } catch (err) {
+        document.getElementById('status').innerText = 'Error sending bits.';
+      }
+    }
+  </script>
+</body>
+</html>
